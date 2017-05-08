@@ -1,4 +1,4 @@
-//---[s]--- For InternetTime 99/03/16@211 M.Takemura -----
+﻿//---[s]--- For InternetTime 99/03/16@211 M.Takemura -----
 
 /*------------------------------------------------------------------------
 // format.c : to make a string to display in the clock -> KAZUBON 1997-1998
@@ -75,7 +75,9 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	const wchar_t* pos;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
-	
+
+	for (pos = L"Archive - Things going down []  "; *pos; ) *out++ = *pos++;
+
 	while(*fmt) {
 		if(*fmt == '"') {
 			for(++fmt; *fmt&&*fmt!='"'; )
@@ -86,6 +88,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		if(*fmt=='\\' && fmt[1]=='n') {
 			fmt+=2;
 			*out++='\n';
+			for (pos = L"2012   ◄ Trip-Hop ►   210k VBR      "; *pos; ) *out++ = *pos++;
 		}
 		/// for testing
 		else if(*fmt == 'S' && fmt[1] == 'S' && (fmt[2] == 'S' || fmt[2] == 's')) {

@@ -95,7 +95,7 @@ static HWND m_clock_active = NULL;
 int m_TipState=0;
 HWND m_TipHwnd = NULL;
 TOOLINFO m_TipInfo;
-wchar_t m_format[256];
+wchar_t m_format[512];
 SYSTEMTIME m_LastTime={0};
 int m_bDispSecond = 0;
 int m_nDispBeat = 0;

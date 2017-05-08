@@ -50,3 +50,6 @@ T-Clock*.7z
 _*
 Static/
 *.[0-9].*
+src/~ide/.vs/
+src/~ide/version.h
+src/~ide/version.h.lock
