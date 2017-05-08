@@ -73,10 +73,57 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 {
 	const wchar_t* bufend = buf+FORMAT_MAX_SIZE;
 	const wchar_t* pos;
+	wchar_t tags[FORMAT_MAX_SIZE];
+	wchar_t *last;
+	wchar_t *artist;
+	wchar_t *album;
+	wchar_t *bpm;
+	wchar_t *bitrate;
+	wchar_t *comment;
+	wchar_t *genre;
+	wchar_t *rating;
+	wchar_t *rating_out;
+	wchar_t *title;
+	wchar_t *track_gain;
+	wchar_t *year;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
+	FILE *fp;
 
-	for (pos = L"Archive - Things going down []  "; *pos; ) *out++ = *pos++;
+	fp = fopen("d:\\MusicBee\\Tags.txt", "r");
+	if (fp == NULL) perror("Error opening file");
+	else {
+		fgetws(tags, FORMAT_MAX_SIZE, fp);
+		fclose(fp);
+		artist = wcstok(tags, L"\t", &last);
+		title = wcstok(NULL, L"\t", &last);
+		album = wcstok(NULL, L"\t", &last);
+		year = wcstok(NULL, L"\t", &last);
+		genre = wcstok(NULL, L"\t", &last);
+		rating = wcstok(NULL, L"\t", &last);
+		bpm = wcstok(NULL, L"\t", &last);
+		track_gain = wcstok(NULL, L"\t", &last);
+		bitrate = wcstok(NULL, L"\t", &last);
+		comment = wcstok(NULL, L"\t", &last);
+	}
+
+	if (artist) {
+		for (pos = artist; *pos; ) *out++ = *pos++;
+	}
+	if (artist && title) {
+		for (pos = L" — "; *pos; ) *out++ = *pos++;
+	}
+	if (title) {
+		for (pos = title; *pos; ) *out++ = *pos++;
+	}
+
+	rating_out = L" []  ";
+	if (!wcscmp(rating, L"1")) { rating_out = L" []  "; }
+	if (!wcscmp(rating, L"2")) { rating_out = L" []  "; }
+	if (!wcscmp(rating, L"3")) { rating_out = L" []  "; }
+	if (!wcscmp(rating, L"4")) { rating_out = L" []  "; }
+	if (!wcscmp(rating, L"5")) { rating_out = L" []  "; }
+	for (pos = rating_out; *pos; ) *out++ = *pos++;
 
 	while(*fmt) {
 		if(*fmt == '"') {
