@@ -157,7 +157,15 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 				if ((wcslen(bitrate) > 1)) {
 					for (pos = bitrate; *pos; ) *out++ = *pos++;
 				}
-				for (pos = L" "; *pos; ) *out++ = *pos++;
+				if (wcslen(track_gain) > 1) {
+					for (pos = L"   "; *pos; ) *out++ = *pos++;
+					for (pos = track_gain; *pos; ) *out++ = *pos++;
+				}
+				if ((wcslen(bpm) > 1)) {
+					for (pos = L"   ♪"; *pos; ) *out++ = *pos++;
+					for (pos = bpm; *pos; ) *out++ = *pos++;
+				}
+				for (pos = L"  "; *pos; ) *out++ = *pos++;
 				isValid = 0; // add second line only ONCE
 			}
 		}

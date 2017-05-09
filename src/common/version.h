@@ -10,23 +10,23 @@
 #	define VER_STATUS_FULL "Beta"
 #	define VER_STATUS_SHORT "b"
 #	define VER_STATUS_GREEK "β"
-#	define VER_REVISION 461
+#	define VER_REVISION 462
 #	define VER_FULL "2.4.2 Beta"
 #	define VER_SHORT "2.4b2"
 #	define VER_SHORT_DOTS "2.4.2"
 #	define VER_SHORT_GREEK "2.4β2"
-#	define VER_RC_REVISION 2, 4, 2, 461
+#	define VER_RC_REVISION 2, 4, 2, 462
 #	define VER_RC_STATUS 2, 4, 2, 1
 /**** Subversion Information ****/
 #	define VER_REVISION_URL "https://github.com/Snaptags/T-Clock.git"
-#	define VER_REVISION_DATE "2017-05-08 17:25:19 +0000 (Mon, May 08 2017)"
-#	define VER_REVISION_HASH "f5218bc"
-#	define VER_REVISION_TAG "v2.4.2#461-beta"
+#	define VER_REVISION_DATE "2017-05-09 07:25:50 +0000 (Tue, May 09 2017)"
+#	define VER_REVISION_HASH "fa24cdf"
+#	define VER_REVISION_TAG "v2.4.2#462-beta"
 /**** Date/Time ****/
-#	define VER_TIMESTAMP 1494310548
+#	define VER_TIMESTAMP 1494315108
 #	define VER_TIME_SEC 48
-#	define VER_TIME_MIN 15
-#	define VER_TIME_HOUR 6
+#	define VER_TIME_MIN 31
+#	define VER_TIME_HOUR 7
 #	define VER_TIME_DAY 9
 #	define VER_TIME_MONTH 5
 #	define VER_TIME_YEAR 2017
@@ -36,11 +36,11 @@
 #	define VER_TIME_WDAY_FULL "Tuesday"
 #	define VER_TIME_MONTH_SHORT "May"
 #	define VER_TIME_MONTH_FULL "May"
-#	define VER_TIME "06:15:48"
+#	define VER_TIME "07:31:48"
 #	define VER_DATE "2017-05-09"
-#	define VER_DATE_LONG "Tue, May 09, 2017 06:15:48 UTC"
-#	define VER_DATE_SHORT "2017-05-09 06:15:48 UTC"
-#	define VER_DATE_ISO "2017-05-09T06:15:48Z"
+#	define VER_DATE_LONG "Tue, May 09, 2017 07:31:48 UTC"
+#	define VER_DATE_SHORT "2017-05-09 07:31:48 UTC"
+#	define VER_DATE_ISO "2017-05-09T07:31:48Z"
 /**** Helper 'functions' ****/
 #	define VER_IsReleaseOrHigher() ( VER_STATUS >= 3 )
 #	define VER_IsAlpha() ( VER_STATUS == 0 )
