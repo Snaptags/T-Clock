@@ -67,6 +67,8 @@ void InitFormat(const wchar_t* section, SYSTEMTIME* lt)   //--------------------
 
 __pragma(warning(push))
 __pragma(warning(disable:4701)) // MSVC is confused with our S(..) format (uptime) about "num" being "uninitialized"
+
+
 //================================================================================================
 //-------------+++--> Format T-Clock's OutPut String From Current Date, Time, & System Information:
 unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME* pt, int beat100)   //------------------+++-->
@@ -88,13 +90,15 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	wchar_t *year;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
+	BOOLEAN isValid = 0;
 	FILE *fp;
 
-	fp = fopen("d:\\MusicBee\\Tags.txt", "r");
+	fp = fopen("d:\\MusicBee\\Tags.txt", "r, ccs=UTF-8");
 	if (fp == NULL) perror("Error opening file");
 	else {
 		fgetws(tags, FORMAT_MAX_SIZE, fp);
 		fclose(fp);
+		// the separator in the file needs to be <tab><space>, because wcstok is greedy and will skip empty entries otherwise!
 		artist = wcstok(tags, L"\t", &last);
 		title = wcstok(NULL, L"\t", &last);
 		album = wcstok(NULL, L"\t", &last);
@@ -107,24 +111,27 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		comment = wcstok(NULL, L"\t", &last);
 	}
 
-	if (artist) {
-		for (pos = artist; *pos; ) *out++ = *pos++;
-	}
-	if (artist && title) {
-		for (pos = L" — "; *pos; ) *out++ = *pos++;
-	}
-	if (title) {
-		for (pos = title; *pos; ) *out++ = *pos++;
-	}
+	isValid = (wcslen(artist) > 1) || (wcslen(title) > 1);
+	
+	if (isValid) {
+		if ((wcslen(artist) > 1)) {
+			for (pos = artist; *pos; ) *out++ = *pos++;
+		}
+		if ((wcslen(artist) > 1) && (wcslen(title) > 1)) {
+			for (pos = L" —"; *pos; ) *out++ = *pos++;
+		}
+		if ((wcslen(title) > 1)) {
+			for (pos = title; *pos; ) *out++ = *pos++;
+		}
 
-	rating_out = L" []  ";
-	if (!wcscmp(rating, L"1")) { rating_out = L" []  "; }
-	if (!wcscmp(rating, L"2")) { rating_out = L" []  "; }
-	if (!wcscmp(rating, L"3")) { rating_out = L" []  "; }
-	if (!wcscmp(rating, L"4")) { rating_out = L" []  "; }
-	if (!wcscmp(rating, L"5")) { rating_out = L" []  "; }
-	for (pos = rating_out; *pos; ) *out++ = *pos++;
-
+		rating_out = L" []  ";
+		if (!wcscmp(rating, L" 1")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 2")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 3")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 4")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 5")) { rating_out = L" []  "; }
+		for (pos = rating_out; *pos; ) *out++ = *pos++;
+	}
 	while(*fmt) {
 		if(*fmt == '"') {
 			for(++fmt; *fmt&&*fmt!='"'; )
@@ -135,7 +142,24 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		if(*fmt=='\\' && fmt[1]=='n') {
 			fmt+=2;
 			*out++='\n';
-			for (pos = L"2012   ◄ Trip-Hop ►   210k VBR      "; *pos; ) *out++ = *pos++;
+			if (isValid) {
+				if ((wcslen(year) > 1)) {
+					for (pos = year; *pos; ) *out++ = *pos++;
+				}
+				if ((wcslen(year) > 1) && (wcslen(genre) > 1)) {
+					for (pos = L"   "; *pos; ) *out++ = *pos++;
+				}
+				if (wcslen(genre) > 1) {
+					for (pos = L"◄"; *pos; ) *out++ = *pos++;
+					for (pos = genre; *pos; ) *out++ = *pos++;
+					for (pos = L" ►  "; *pos; ) *out++ = *pos++;
+				}
+				if ((wcslen(bitrate) > 1)) {
+					for (pos = bitrate; *pos; ) *out++ = *pos++;
+				}
+				for (pos = L" "; *pos; ) *out++ = *pos++;
+				isValid = 0; // add second line only ONCE
+			}
 		}
 		/// for testing
 		else if(*fmt == 'S' && fmt[1] == 'S' && (fmt[2] == 'S' || fmt[2] == 's')) {
