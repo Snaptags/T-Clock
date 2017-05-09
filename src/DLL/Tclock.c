@@ -1358,7 +1358,7 @@ void DrawClockSub(HDC hdc, SYSTEMTIME* pt, int beat100)
 	for(color=m_color_start; color<m_color_end; ++color)
 		*(unsigned*)color=0xFFFFFFFF;
 	len=MakeFormat(buf, m_format, pt, beat100);
-	
+
 	vpos=m_vertpos;
 	hpos=m_horizpos;
 	for(pos=buf; *pos; ){
