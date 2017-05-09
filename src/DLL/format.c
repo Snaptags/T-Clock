@@ -111,7 +111,7 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		comment = wcstok(NULL, L"\t", &last);
 	}
 
-	isValid = (wcslen(artist) > 1) || (wcslen(title) > 1);
+	isValid = (artist && (wcslen(artist) > 1)) || (title && (wcslen(title) > 1));
 	
 	if (isValid) {
 		if ((wcslen(artist) > 1)) {
