@@ -71,19 +71,12 @@ __pragma(warning(disable:4701)) // MSVC is confused with our S(..) format (uptim
 
 //================================================================================================
 //-------------+++--> Format T-Clock's OutPut String From Current Date, Time, & System Information:
-unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME* pt, int beat100, static const wchar_t* musicbee_top, static const wchar_t* musicbee_bottom)   //------------------+++-->
+unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME* pt, int beat100)   //------------------+++-->
 {
 	const wchar_t* bufend = buf+FORMAT_MAX_SIZE;
 	const wchar_t* pos;
 	wchar_t* out = buf;
 	ULONGLONG TickCount = 0;
-
-	if (musicbee_top && (wcslen(musicbee_top) > 1)) {
-		for (pos = musicbee_top; *pos; ) *out++ = *pos++;
-	}
-	else {
-		for (pos = L"###empty_t###  "; *pos; ) *out++ = *pos++;
-	}
 
 	while(*fmt) {
 		if(*fmt == '"') {
@@ -95,12 +88,6 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		if(*fmt=='\\' && fmt[1]=='n') {
 			fmt+=2;
 			*out++='\n';
-			if (musicbee_bottom && (wcslen(musicbee_bottom) > 1)) {
-				for (pos = musicbee_bottom; *pos; ) *out++ = *pos++;
-			}
-			else {
-				for (pos = L"###empty_b### "; *pos; ) *out++ = *pos++;
-			}
 		}
 		/// for testing
 		else if(*fmt == 'S' && fmt[1] == 'S' && (fmt[2] == 'S' || fmt[2] == 's')) {

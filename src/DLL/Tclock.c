@@ -1350,7 +1350,7 @@ void CalculateClockTextSize(){
 	time.wMinute = time.wSecond = 22;
 	time.wMilliseconds = 666;
 	beat100 = 666;
-	len = MakeFormat(buf, m_format, &time, beat100, NULL, NULL);
+	len = MakeFormat(buf, m_format, &time, beat100);
 	/// calc size
 	GetTextMetrics(m_hdcClock,&tm);
 	m_textpadding = tm.tmAveCharWidth*2;
@@ -1471,7 +1471,7 @@ void DrawClockSub(HDC hdc, SYSTEMTIME* pt, int beat100)
 	const unsigned opacity=255-m_col.quad.rgbReserved;
 	for(color=m_color_start; color<m_color_end; ++color)
 		*(unsigned*)color=0xFFFFFFFF;
-	len=MakeFormat(buf, m_format, pt, beat100, NULL, NULL);
+	len=MakeFormat(buf, m_format, pt, beat100);
 
 	vpos=m_vertpos;
 	hpos=m_horizpos;
@@ -1539,7 +1539,7 @@ void OnTooltipNeedText(UINT code, LPARAM lParam)
 		memcpy(fmt, TC_TOOLTIP, sizeof(TC_TOOLTIP));
 	
 	GetDisplayTime(&t, &beat100);
-	MakeFormat(str, fmt, &t, beat100, NULL, NULL);
+	MakeFormat(str, fmt, &t, beat100);
 	if(code == TTN_NEEDTEXTA){
 		NMTTDISPINFOA* tooltip = (NMTTDISPINFOA*)lParam;
 		WideCharToMultiByte(CP_ACP, 0, str, -1, tooltip->szText, _countof(tooltip->szText), NULL, NULL);
@@ -1567,7 +1567,7 @@ void OnCopy(HWND hwnd, LPARAM lParam)
 	if(!*fmt)
 		wcscpy(fmt, m_format);
 	
-	MakeFormat(s, fmt, &t, beat100, NULL, NULL);
+	MakeFormat(s, fmt, &t, beat100);
 	size = (wcslen(s) + 1) * sizeof(s[0]);
 	
 	if(!OpenClipboard(hwnd))
