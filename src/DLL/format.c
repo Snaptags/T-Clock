@@ -75,6 +75,10 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 {
 	const wchar_t* bufend = buf+FORMAT_MAX_SIZE;
 	const wchar_t* pos;
+	const wchar_t* pos_tl;
+	const wchar_t* pos_tr;
+	const wchar_t* pos_bl;
+	const wchar_t* pos_br;
 	wchar_t tags[FORMAT_MAX_SIZE];
 	wchar_t *last;
 	wchar_t *artist = NULL;
@@ -89,6 +93,16 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	wchar_t *track_gain = NULL;
 	wchar_t *year = NULL;
 	wchar_t* out = buf;
+	wchar_t topLeft[FORMAT_MAX_SIZE];
+	wchar_t topRight[FORMAT_MAX_SIZE];
+	wchar_t bottomLeft[FORMAT_MAX_SIZE];
+	wchar_t bottomRight[FORMAT_MAX_SIZE];
+	wchar_t* tl = topLeft;
+	wchar_t* tr = topRight;
+	wchar_t* bl = bottomLeft;
+	wchar_t* br = bottomRight;
+	int lengthDiff = 0;
+	int i;
 	ULONGLONG TickCount = 0;
 	BOOLEAN isValid = 0;
 	FILE *fp;
@@ -115,13 +129,13 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 	
 	if (isValid) {
 		if ((wcslen(artist) > 1)) {
-			for (pos = artist; *pos; ) *out++ = *pos++;
+			for (pos_tl = artist; *pos_tl; ) *tl++ = *pos_tl++;
 		}
 		if ((wcslen(artist) > 1) && (wcslen(title) > 1)) {
-			for (pos = L" —"; *pos; ) *out++ = *pos++;
+			for (pos_tl = L" —"; *pos_tl; ) *tl++ = *pos_tl++;
 		}
 		if ((wcslen(title) > 1)) {
-			for (pos = title; *pos; ) *out++ = *pos++;
+			for (pos_tl = title; *pos_tl; ) *tl++ = *pos_tl++;
 		}
 
 		rating_out = L" []  ";
@@ -130,8 +144,49 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		if (!wcscmp(rating, L" 3")) { rating_out = L" []  "; }
 		if (!wcscmp(rating, L" 4")) { rating_out = L" []  "; }
 		if (!wcscmp(rating, L" 5")) { rating_out = L" []  "; }
-		for (pos = rating_out; *pos; ) *out++ = *pos++;
+		for (pos_tr = rating_out; *pos_tr; ) *tr++ = *pos_tr++;
+
+		if ((wcslen(year) > 1)) {
+			for (pos_bl = year; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if ((wcslen(year) > 1) && (wcslen(genre) > 1)) {
+			for (pos_bl = L"   "; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if (wcslen(genre) > 1) {
+			for (pos_bl = L"◄";    *pos_bl; ) *bl++ = *pos_bl++;
+			for (pos_bl = genre;   *pos_bl; ) *bl++ = *pos_bl++;
+			for (pos_bl = L" ►  "; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if ((wcslen(bitrate) > 1)) {
+			for (pos_bl = bitrate; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+
+		if (wcslen(track_gain) > 1) {
+			for (pos_br = L"   ";    *pos_br; ) *br++ = *pos_br++;
+			for (pos_br = track_gain; *pos_br; ) *br++ = *pos_br++;
+		}
+		if ((wcslen(bpm) > 1)) {
+			for (pos_br = L"   ♪"; *pos_br; ) *br++ = *pos_br++;
+			for (pos_br = bpm;     *pos_br; ) *br++ = *pos_br++;
+		}
+		for (pos_br = L"  "; *pos_br; ) *br++ = *pos_br++;
+
+		lengthDiff = wcslen(topLeft) + wcslen(topLeft) - wcslen(bottomLeft) - wcslen(bottomRight);
+		lengthDiff = 12;
+		//if (lengthDiff > 0) {
+		//	for (i = 0; i < lengthDiff; ++i) {
+		//		*tl++=' ';
+		//	}
+		//}
+		//else {
+		//	for (i = lengthDiff; i < 0; ++i) {
+		//		*bl++=' ';
+		//	}
+		//}
+		for (pos = topLeft;  *pos; ) *out++ = *pos++;
+		for (pos = topRight; *pos; ) *out++ = *pos++;
 	}
+
 	while(*fmt) {
 		if(*fmt == '"') {
 			for(++fmt; *fmt&&*fmt!='"'; )
@@ -143,29 +198,8 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			fmt+=2;
 			*out++='\n';
 			if (isValid) {
-				if ((wcslen(year) > 1)) {
-					for (pos = year; *pos; ) *out++ = *pos++;
-				}
-				if ((wcslen(year) > 1) && (wcslen(genre) > 1)) {
-					for (pos = L"   "; *pos; ) *out++ = *pos++;
-				}
-				if (wcslen(genre) > 1) {
-					for (pos = L"◄"; *pos; ) *out++ = *pos++;
-					for (pos = genre; *pos; ) *out++ = *pos++;
-					for (pos = L" ►  "; *pos; ) *out++ = *pos++;
-				}
-				if ((wcslen(bitrate) > 1)) {
-					for (pos = bitrate; *pos; ) *out++ = *pos++;
-				}
-				if (wcslen(track_gain) > 1) {
-					for (pos = L"   "; *pos; ) *out++ = *pos++;
-					for (pos = track_gain; *pos; ) *out++ = *pos++;
-				}
-				if ((wcslen(bpm) > 1)) {
-					for (pos = L"   ♪"; *pos; ) *out++ = *pos++;
-					for (pos = bpm; *pos; ) *out++ = *pos++;
-				}
-				for (pos = L"  "; *pos; ) *out++ = *pos++;
+				for (pos = bottomLeft;  *pos; ) *out++ = *pos++;
+				for (pos = bottomRight; *pos; ) *out++ = *pos++;
 				isValid = 0; // add second line only ONCE
 			}
 		}
@@ -594,7 +628,11 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 			*out++ = *fmt++;
 		}
 	}
-	*out='\0';
+	*out= '\0';
+	*tl = '\0';
+	*tr = '\0';
+	*bl = '\0';
+	*br = '\0';
 	return (unsigned)(out-buf);
 }
 __pragma(warning(pop))
