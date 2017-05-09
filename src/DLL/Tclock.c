@@ -1014,6 +1014,120 @@ static LRESULT CALLBACK Window_SecondaryTaskbarWorker_Hooked(HWND hwnd, UINT mes
 	}
 	return DefSubclassProc(hwnd, message, wParam, lParam);
 }
+
+void ReadMusicBeeTags()
+{
+	const wchar_t* pos_tl;
+	const wchar_t* pos_tr;
+	const wchar_t* pos_bl;
+	const wchar_t* pos_br;
+	wchar_t tags[FORMAT_MAX_SIZE];
+	wchar_t *last;
+	wchar_t *artist = NULL;
+	wchar_t *album = NULL;
+	wchar_t *bpm = NULL;
+	wchar_t *bitrate = NULL;
+	wchar_t *comment = NULL;
+	wchar_t *genre = NULL;
+	wchar_t *rating = NULL;
+	wchar_t *rating_out = NULL;
+	wchar_t *title = NULL;
+	wchar_t *track_gain = NULL;
+	wchar_t *year = NULL;
+	wchar_t topLeft[FORMAT_MAX_SIZE];
+	wchar_t topRight[FORMAT_MAX_SIZE];
+	wchar_t bottomLeft[FORMAT_MAX_SIZE];
+	wchar_t bottomRight[FORMAT_MAX_SIZE];
+	wchar_t* tl = topLeft;
+	wchar_t* tr = topRight;
+	wchar_t* bl = bottomLeft;
+	wchar_t* br = bottomRight;
+	int lengthDiff = 0;
+	int i;
+	BOOLEAN isValid = 0;
+	FILE *fp;
+
+	fp = fopen("d:\\MusicBee\\Tags.txt", "r, ccs=UTF-8");
+	if (fp == NULL) perror("Error opening file");
+	else {
+		fgetws(tags, FORMAT_MAX_SIZE, fp);
+		fclose(fp);
+		// the separator in the file needs to be <tab><space>, because wcstok is greedy and will skip empty entries otherwise!
+		artist = wcstok(tags, L"\t", &last);
+		title = wcstok(NULL, L"\t", &last);
+		album = wcstok(NULL, L"\t", &last);
+		year = wcstok(NULL, L"\t", &last);
+		genre = wcstok(NULL, L"\t", &last);
+		rating = wcstok(NULL, L"\t", &last);
+		bpm = wcstok(NULL, L"\t", &last);
+		track_gain = wcstok(NULL, L"\t", &last);
+		bitrate = wcstok(NULL, L"\t", &last);
+		comment = wcstok(NULL, L"\t", &last);
+	}
+
+	isValid = (artist && (wcslen(artist) > 1)) || (title && (wcslen(title) > 1));
+
+	if (isValid) {
+		if ((wcslen(artist) > 1)) {
+			for (pos_tl = artist; *pos_tl; ) *tl++ = *pos_tl++;
+		}
+		if ((wcslen(artist) > 1) && (wcslen(title) > 1)) {
+			for (pos_tl = L" —"; *pos_tl; ) *tl++ = *pos_tl++;
+		}
+		if ((wcslen(title) > 1)) {
+			for (pos_tl = title; *pos_tl; ) *tl++ = *pos_tl++;
+		}
+
+		rating_out = L" []  ";
+		if (!wcscmp(rating, L" 1")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 2")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 3")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 4")) { rating_out = L" []  "; }
+		if (!wcscmp(rating, L" 5")) { rating_out = L" []  "; }
+		for (pos_tr = rating_out; *pos_tr; ) *tr++ = *pos_tr++;
+
+		if ((wcslen(year) > 1)) {
+			for (pos_bl = year; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if ((wcslen(year) > 1) && (wcslen(genre) > 1)) {
+			for (pos_bl = L"   "; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if (wcslen(genre) > 1) {
+			for (pos_bl = L"◄"; *pos_bl; ) *bl++ = *pos_bl++;
+			for (pos_bl = genre; *pos_bl; ) *bl++ = *pos_bl++;
+			for (pos_bl = L" ►  "; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+		if ((wcslen(bitrate) > 1)) {
+			for (pos_bl = bitrate; *pos_bl; ) *bl++ = *pos_bl++;
+		}
+
+		if (wcslen(track_gain) > 1) {
+			for (pos_br = L"   "; *pos_br; ) *br++ = *pos_br++;
+			for (pos_br = track_gain; *pos_br; ) *br++ = *pos_br++;
+		}
+		if ((wcslen(bpm) > 1)) {
+			for (pos_br = L"   ♪"; *pos_br; ) *br++ = *pos_br++;
+			for (pos_br = bpm; *pos_br; ) *br++ = *pos_br++;
+		}
+		for (pos_br = L"  "; *pos_br; ) *br++ = *pos_br++;
+
+		lengthDiff = wcslen(tl) + wcslen(tr) - wcslen(bl) - wcslen(br);
+		if (lengthDiff > 0) {
+			for (i = 0; i < lengthDiff; i++) {
+				*tl++ = L'²';
+			}
+		}
+		else {
+			for (i = lengthDiff; i < 0; i++) {
+				*bl++ = L'³';
+			}
+		}
+		//	for (pos = topLeft; *pos; ) *out++ = *pos++;
+		//	for (pos = topRight; *pos; ) *out++ = *pos++;
+	}
+}
+
+
 //==========================================================================
 //---------------------------------+++--> Retreive T-Clock's format settings:
 void ReadFormatData(HWND hwnd, int preview)   //---------------------+++-->
@@ -1236,7 +1350,7 @@ void CalculateClockTextSize(){
 	time.wMinute = time.wSecond = 22;
 	time.wMilliseconds = 666;
 	beat100 = 666;
-	len = MakeFormat(buf, m_format, &time, beat100);
+	len = MakeFormat(buf, m_format, &time, beat100, NULL, NULL);
 	/// calc size
 	GetTextMetrics(m_hdcClock,&tm);
 	m_textpadding = tm.tmAveCharWidth*2;
@@ -1357,7 +1471,7 @@ void DrawClockSub(HDC hdc, SYSTEMTIME* pt, int beat100)
 	const unsigned opacity=255-m_col.quad.rgbReserved;
 	for(color=m_color_start; color<m_color_end; ++color)
 		*(unsigned*)color=0xFFFFFFFF;
-	len=MakeFormat(buf, m_format, pt, beat100);
+	len=MakeFormat(buf, m_format, pt, beat100, NULL, NULL);
 
 	vpos=m_vertpos;
 	hpos=m_horizpos;
@@ -1425,7 +1539,7 @@ void OnTooltipNeedText(UINT code, LPARAM lParam)
 		memcpy(fmt, TC_TOOLTIP, sizeof(TC_TOOLTIP));
 	
 	GetDisplayTime(&t, &beat100);
-	MakeFormat(str, fmt, &t, beat100);
+	MakeFormat(str, fmt, &t, beat100, NULL, NULL);
 	if(code == TTN_NEEDTEXTA){
 		NMTTDISPINFOA* tooltip = (NMTTDISPINFOA*)lParam;
 		WideCharToMultiByte(CP_ACP, 0, str, -1, tooltip->szText, _countof(tooltip->szText), NULL, NULL);
@@ -1453,7 +1567,7 @@ void OnCopy(HWND hwnd, LPARAM lParam)
 	if(!*fmt)
 		wcscpy(fmt, m_format);
 	
-	MakeFormat(s, fmt, &t, beat100);
+	MakeFormat(s, fmt, &t, beat100, NULL, NULL);
 	size = (wcslen(s) + 1) * sizeof(s[0]);
 	
 	if(!OpenClipboard(hwnd))

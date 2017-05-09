@@ -71,120 +71,18 @@ __pragma(warning(disable:4701)) // MSVC is confused with our S(..) format (uptim
 
 //================================================================================================
 //-------------+++--> Format T-Clock's OutPut String From Current Date, Time, & System Information:
-unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME* pt, int beat100)   //------------------+++-->
+unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME* pt, int beat100, static const wchar_t* musicbee_top, static const wchar_t* musicbee_bottom)   //------------------+++-->
 {
 	const wchar_t* bufend = buf+FORMAT_MAX_SIZE;
 	const wchar_t* pos;
-	const wchar_t* pos_tl;
-	const wchar_t* pos_tr;
-	const wchar_t* pos_bl;
-	const wchar_t* pos_br;
-	wchar_t tags[FORMAT_MAX_SIZE];
-	wchar_t *last;
-	wchar_t *artist = NULL;
-	wchar_t *album = NULL;
-	wchar_t *bpm = NULL;
-	wchar_t *bitrate = NULL;
-	wchar_t *comment = NULL;
-	wchar_t *genre = NULL;
-	wchar_t *rating = NULL;
-	wchar_t *rating_out = NULL;
-	wchar_t *title = NULL;
-	wchar_t *track_gain = NULL;
-	wchar_t *year = NULL;
 	wchar_t* out = buf;
-	wchar_t topLeft[FORMAT_MAX_SIZE];
-	wchar_t topRight[FORMAT_MAX_SIZE];
-	wchar_t bottomLeft[FORMAT_MAX_SIZE];
-	wchar_t bottomRight[FORMAT_MAX_SIZE];
-	wchar_t* tl = topLeft;
-	wchar_t* tr = topRight;
-	wchar_t* bl = bottomLeft;
-	wchar_t* br = bottomRight;
-	int lengthDiff = 0;
-	int i;
 	ULONGLONG TickCount = 0;
-	BOOLEAN isValid = 0;
-	FILE *fp;
 
-	fp = fopen("d:\\MusicBee\\Tags.txt", "r, ccs=UTF-8");
-	if (fp == NULL) perror("Error opening file");
-	else {
-		fgetws(tags, FORMAT_MAX_SIZE, fp);
-		fclose(fp);
-		// the separator in the file needs to be <tab><space>, because wcstok is greedy and will skip empty entries otherwise!
-		artist = wcstok(tags, L"\t", &last);
-		title = wcstok(NULL, L"\t", &last);
-		album = wcstok(NULL, L"\t", &last);
-		year = wcstok(NULL, L"\t", &last);
-		genre = wcstok(NULL, L"\t", &last);
-		rating = wcstok(NULL, L"\t", &last);
-		bpm = wcstok(NULL, L"\t", &last);
-		track_gain = wcstok(NULL, L"\t", &last);
-		bitrate = wcstok(NULL, L"\t", &last);
-		comment = wcstok(NULL, L"\t", &last);
+	if (musicbee_top && (wcslen(musicbee_top) > 1)) {
+		for (pos = musicbee_top; *pos; ) *out++ = *pos++;
 	}
-
-	isValid = (artist && (wcslen(artist) > 1)) || (title && (wcslen(title) > 1));
-	
-	if (isValid) {
-		if ((wcslen(artist) > 1)) {
-			for (pos_tl = artist; *pos_tl; ) *tl++ = *pos_tl++;
-		}
-		if ((wcslen(artist) > 1) && (wcslen(title) > 1)) {
-			for (pos_tl = L" —"; *pos_tl; ) *tl++ = *pos_tl++;
-		}
-		if ((wcslen(title) > 1)) {
-			for (pos_tl = title; *pos_tl; ) *tl++ = *pos_tl++;
-		}
-
-		rating_out = L" []  ";
-		if (!wcscmp(rating, L" 1")) { rating_out = L" []  "; }
-		if (!wcscmp(rating, L" 2")) { rating_out = L" []  "; }
-		if (!wcscmp(rating, L" 3")) { rating_out = L" []  "; }
-		if (!wcscmp(rating, L" 4")) { rating_out = L" []  "; }
-		if (!wcscmp(rating, L" 5")) { rating_out = L" []  "; }
-		for (pos_tr = rating_out; *pos_tr; ) *tr++ = *pos_tr++;
-
-		if ((wcslen(year) > 1)) {
-			for (pos_bl = year; *pos_bl; ) *bl++ = *pos_bl++;
-		}
-		if ((wcslen(year) > 1) && (wcslen(genre) > 1)) {
-			for (pos_bl = L"   "; *pos_bl; ) *bl++ = *pos_bl++;
-		}
-		if (wcslen(genre) > 1) {
-			for (pos_bl = L"◄";    *pos_bl; ) *bl++ = *pos_bl++;
-			for (pos_bl = genre;   *pos_bl; ) *bl++ = *pos_bl++;
-			for (pos_bl = L" ►  "; *pos_bl; ) *bl++ = *pos_bl++;
-		}
-		if ((wcslen(bitrate) > 1)) {
-			for (pos_bl = bitrate; *pos_bl; ) *bl++ = *pos_bl++;
-		}
-
-		if (wcslen(track_gain) > 1) {
-			for (pos_br = L"   ";    *pos_br; ) *br++ = *pos_br++;
-			for (pos_br = track_gain; *pos_br; ) *br++ = *pos_br++;
-		}
-		if ((wcslen(bpm) > 1)) {
-			for (pos_br = L"   ♪"; *pos_br; ) *br++ = *pos_br++;
-			for (pos_br = bpm;     *pos_br; ) *br++ = *pos_br++;
-		}
-		for (pos_br = L"  "; *pos_br; ) *br++ = *pos_br++;
-
-		lengthDiff = wcslen(topLeft) + wcslen(topLeft) - wcslen(bottomLeft) - wcslen(bottomRight);
-		lengthDiff = 12;
-		//if (lengthDiff > 0) {
-		//	for (i = 0; i < lengthDiff; ++i) {
-		//		*tl++=' ';
-		//	}
-		//}
-		//else {
-		//	for (i = lengthDiff; i < 0; ++i) {
-		//		*bl++=' ';
-		//	}
-		//}
-		for (pos = topLeft;  *pos; ) *out++ = *pos++;
-		for (pos = topRight; *pos; ) *out++ = *pos++;
+	else {
+		for (pos = L"###empty_t###  "; *pos; ) *out++ = *pos++;
 	}
 
 	while(*fmt) {
@@ -197,10 +95,11 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		if(*fmt=='\\' && fmt[1]=='n') {
 			fmt+=2;
 			*out++='\n';
-			if (isValid) {
-				for (pos = bottomLeft;  *pos; ) *out++ = *pos++;
-				for (pos = bottomRight; *pos; ) *out++ = *pos++;
-				isValid = 0; // add second line only ONCE
+			if (musicbee_bottom && (wcslen(musicbee_bottom) > 1)) {
+				for (pos = musicbee_bottom; *pos; ) *out++ = *pos++;
+			}
+			else {
+				for (pos = L"###empty_b### "; *pos; ) *out++ = *pos++;
 			}
 		}
 		/// for testing
@@ -629,10 +528,6 @@ unsigned MakeFormat(wchar_t buf[FORMAT_MAX_SIZE], const wchar_t* fmt, SYSTEMTIME
 		}
 	}
 	*out= '\0';
-	*tl = '\0';
-	*tr = '\0';
-	*bl = '\0';
-	*br = '\0';
 	return (unsigned)(out-buf);
 }
 __pragma(warning(pop))
