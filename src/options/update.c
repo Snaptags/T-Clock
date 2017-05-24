@@ -77,18 +77,32 @@ void UpdateCheck_Free(UpdateData* data) {
 }
 
 int UpdateCheck_WriteDescription(wchar_t* out, int size, const char* text) {
-	int written = 0;
+	static const wchar_t kPadding[4] = {' ', ' ', ' ', ' '};
+	int remaining = --size;
+	int num;
 	wchar_t* pos = out;
 	char* nl;
-	do{
+	while(remaining > _countof(kPadding)){
+		memcpy(pos, kPadding, sizeof(kPadding));
+		remaining -= _countof(kPadding);
+		pos += _countof(kPadding);
+		
 		nl = strchr(text, '\n');
 		if(!nl++)
 			nl = strchr(text, '\0');
-		pos += swprintf(pos, size-written, FMT("   %.*hs"), nl-text, text);
-		text = nl;;
-		written = pos-out;
-	}while(*nl);
-	return written;
+		num = MultiByteToWideChar(CP_UTF8, 0, text, (nl - text), pos, remaining);
+		remaining -= num;
+		pos += num;
+		if(!num || !*nl)
+			break;
+		text = nl;
+	}
+	*pos = '\0';
+//	for(; *out; ++out) {
+//		if(*out == ' ')
+//			*out = L' ';
+//	}
+	return (size - remaining);
 }
 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa383138%28v=vs.85%29.aspx
@@ -195,10 +209,10 @@ static INT_PTR CALLBACK Window_UpdateCheckDlg(HWND hDlg, UINT uMsg, WPARAM wPara
 		SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)data->icon_update);
 		data->icon_update_small = LoadImage(g_instance, MAKEINTRESOURCE(IDI_UPDATE_S), IMAGE_ICON, 0,0, LR_DEFAULTSIZE);
 		data->next_version[0] = api.GetInt(NULL, kValueNextVersion[0], 1);
-		#if VER_IsReleaseOrHigher() // release build, opt-in beta check
 		data->next_version[1] = api.GetInt(NULL, kValueNextVersion[1], 0);
-		#else // non-release build, force beta check
-		data->next_version[1] = 1;
+		#if !VER_IsReleaseOrHigher() // non-release build, forced beta check
+		if(!data->next_version[1])
+			data->next_version[1] = 1;
 		#endif
 		SetWindowLongPtr(hDlg, DWLP_USER, (LONG_PTR)data);
 		
@@ -333,8 +347,8 @@ static INT_PTR CALLBACK Window_UpdateCheckDlg(HWND hDlg, UINT uMsg, WPARAM wPara
 				if(data->type != UPDATE_SILENT) {
 					wchar_t* abovebehind;
 					wchar_t* msg,* msg_pos,* msg_end;
-					msg = msg_pos = (wchar_t*)malloc((512*UPDATE_BUFFER) * sizeof(msg[0]));
-					msg_end = msg + UPDATE_BUFFER;
+					msg = msg_pos = (wchar_t*)malloc((512 + UPDATE_BUFFER) * sizeof(msg[0]));
+					msg_end = msg + (512 + UPDATE_BUFFER);
 					if(!msg) {
 						SendMessage(hDlg, WM_DOWNLOAD_RESULT, 2, 0);
 						return 1;

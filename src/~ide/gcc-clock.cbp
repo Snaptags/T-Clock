@@ -72,6 +72,7 @@
 					<Add option="-m64" />
 				</Linker>
 				<ExtraCommands>
+					<Add before='cmd /C &quot;del ..\..\Debug\Crash.log&quot;' />
 					<Add after="objcopy --only-keep-debug ../../Debug/Clock64.exe ../../Debug/Clock64.dbg" />
 					<Add after="objcopy --strip-debug --strip-unneeded --add-gnu-debuglink=../../Debug/Clock64.dbg ../../Debug/Clock64.exe" />
 				</ExtraCommands>
@@ -105,16 +106,17 @@
 			<Add library="ole32" />
 			<Add library="gdi32" />
 			<Add library="psapi" />
+			<Add library="comctl32" />
 			<Add library="comdlg32" />
 			<Add library="shlwapi" />
 			<Add library="version" />
-			<Add library="comctl32" />
 			<Add library="winmm" />
 			<Add library="ws2_32" />
 			<Add library="mpr" />
 			<Add library="uuid" />
 			<Add library="msimg32" />
 			<Add library="dsound" />
+			<Add library="wtsapi32" />
 		</Linker>
 		<ExtraCommands>
 			<Add before="../common/AutoVersion --git . ../common/version.h" />
